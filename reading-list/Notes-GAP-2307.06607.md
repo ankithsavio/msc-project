@@ -24,5 +24,16 @@ Comprehensive Notes for [[2307.06607v2.pdf]]
 - Proposal : Image is an generative accumulation of photons and are perceptible to shot noise
 	- Train CNN to predict a distribution for the next possible photon location
 	- Predicting next photon $\approx$ denoising
-	- 
+
+- Image : 
+	- Formation :
+		- Digital sensors : Have multiple detector elements 
+		- Simplified model : No. of pixel = No. of detector elements
+		- Ideal case : pixel value = No. of photons
+	- Shot Noise :
+		- No. of photons at each detector element or the pixel location follows a Poisson distribution
+		- Photons are independent, Therefore we can use product of independent distributions to describe the whole noisy image
+
+- Denoising
+	- MMSE : Minimum MSE leads to expectation over all possible clean images, compromising on the quality of the images.
 
