@@ -1,0 +1,3 @@
+Diffusion with noise as learned rep in one language -> denoise -> clean representation in another language
+
+tiny changes from gradients with Cross Entropy
