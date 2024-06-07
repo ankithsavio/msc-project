@@ -4,26 +4,8 @@
     "type": "split",
     "children": [
       {
-        "id": "112fea8f2bbeec31",
-        "type": "tabs",
-        "dimension": 61.12600536193029,
-        "children": [
-          {
-            "id": "72c23601c90db695",
-            "type": "leaf",
-            "state": {
-              "type": "pdf",
-              "state": {
-                "file": "reading-list/2307.06607v2.pdf"
-              }
-            }
-          }
-        ]
-      },
-      {
         "id": "98ac81052d2f4bd7",
         "type": "tabs",
-        "dimension": 38.8739946380697,
         "children": [
           {
             "id": "8b58c05a74f24c54",
@@ -104,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "reading-list/2307.06607v2.pdf",
+                "file": "reading-list/Notes-GAP-2307.06607.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -121,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "reading-list/2307.06607v2.pdf",
+                "file": "reading-list/Notes-GAP-2307.06607.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -144,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "reading-list/2307.06607v2.pdf"
+                "file": "reading-list/Notes-GAP-2307.06607.md"
               }
             }
           }
@@ -165,10 +147,18 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "72c23601c90db695",
+  "active": "8b58c05a74f24c54",
   "lastOpenFiles": [
-    "reading-list/Notes-GAP-2307.06607.md",
     "reading-list/2307.06607v2.pdf",
+    "GAP/gap/__pycache__/BinomDataset.cpython-39.pyc.139689970308000",
+    "GAP/gap/__pycache__/inference.cpython-39.pyc",
+    "GAP/gap/__pycache__/inference.cpython-39.pyc.139976613271664",
+    "GAP/gap/__pycache__/BinomDataset.cpython-39.pyc",
+    "GAP/gap/__pycache__/BinomDataset.cpython-39.pyc.139976613293200",
+    "GAP/gap/__pycache__/GAP_UNET_ResBlock.cpython-39.pyc",
+    "GAP/gap/__pycache__",
+    "GAP/condaenv.u34b0r97.requirements.txt",
+    "reading-list/Notes-GAP-2307.06607.md",
     "Untitled.md"
   ]
 }
