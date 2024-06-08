@@ -30,7 +30,7 @@ class BinomDataset(torch.utils.data.Dataset):
         self.virtSize = virtSize
         self.augment = augment
     
-    def __len__(self):
+    def __len__(self): 
         if self.virtSize is not None:
             return self.virtSize
         else:
@@ -39,8 +39,8 @@ class BinomDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         idx_ = idx 
         if self.virtSize is not None:
-            idx_ = np.random.randint(self.data.shape[0])
-        img = self.crop(self.data[idx_])
+            idx_ = np.random.randint(self.data.shape[0]) # get random sample
+        img = self.crop(self.data[idx_]) # crop the sample 
         
         
         uniform = np.random.rand()*(self.maxPSNR-self.minPSNR)+self.minPSNR
