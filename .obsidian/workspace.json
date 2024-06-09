@@ -11,11 +11,9 @@
             "id": "8b58c05a74f24c54",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "pdf",
               "state": {
-                "file": "reading-list/Notes-GAP-2307.06607.md",
-                "mode": "source",
-                "source": false
+                "file": "reading-list/2307.06607v2.pdf"
               }
             }
           }
@@ -86,7 +84,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "reading-list/Notes-GAP-2307.06607.md",
+                "file": "reading-list/2307.06607v2.pdf",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +101,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "reading-list/Notes-GAP-2307.06607.md",
+                "file": "reading-list/2307.06607v2.pdf",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +124,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "reading-list/Notes-GAP-2307.06607.md"
+                "file": "reading-list/2307.06607v2.pdf"
               }
             }
           }
@@ -149,6 +147,17 @@
   },
   "active": "8b58c05a74f24c54",
   "lastOpenFiles": [
+    "outputs/cov-lowres-sample2.png",
+    "outputs/cov-train-gt.png",
+    "outputs/cov-lowres-sample.png",
+    "outputs/cov-train.png",
+    "outputs/output-2.png",
+    "outputs/output.png",
+    "outputs",
+    "output-2.png",
+    "2output-2.png",
+    "output.png",
+    "reading-list/Notes-GAP-2307.06607.md",
     "reading-list/2307.06607v2.pdf",
     "GAP/gap/__pycache__/BinomDataset.cpython-39.pyc.139689970308000",
     "GAP/gap/__pycache__/inference.cpython-39.pyc",
@@ -158,7 +167,6 @@
     "GAP/gap/__pycache__/GAP_UNET_ResBlock.cpython-39.pyc",
     "GAP/gap/__pycache__",
     "GAP/condaenv.u34b0r97.requirements.txt",
-    "reading-list/Notes-GAP-2307.06607.md",
     "Untitled.md"
   ]
 }
