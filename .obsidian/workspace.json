@@ -4,16 +4,18 @@
     "type": "split",
     "children": [
       {
-        "id": "98ac81052d2f4bd7",
+        "id": "1d9e9522a6db6b0a",
         "type": "tabs",
         "children": [
           {
-            "id": "8b58c05a74f24c54",
+            "id": "3b7905f7c4663c19",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "markdown",
               "state": {
-                "file": "reading-list/2307.06607v2.pdf"
+                "file": "reading-list/Notes-GAP-2307.06607.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -67,8 +69,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "bc8614bb54d0dbd9",
@@ -84,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "reading-list/2307.06607v2.pdf",
+                "file": "reading-list/Notes-GAP-2307.06607.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -101,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "reading-list/2307.06607v2.pdf",
+                "file": "reading-list/Notes-GAP-2307.06607.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -124,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "reading-list/2307.06607v2.pdf"
+                "file": "reading-list/Notes-GAP-2307.06607.md"
               }
             }
           }
@@ -145,28 +146,30 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "8b58c05a74f24c54",
+  "active": "3b7905f7c4663c19",
   "lastOpenFiles": [
+    "GAP/gap/__pycache__/BinomDatasetv2.cpython-39.pyc.139984263568000",
+    "format-mass-spec-data.ipynb",
+    "GAP/gap/__pycache__/BinomDatasetv2.cpython-39.pyc",
+    "GAP/gap/__pycache__/BinomDatasetv2.cpython-39.pyc.140717114399712",
+    "GAP/examples/convallaria/Train-and-Test-4.ipynb",
+    "GAP/examples/convallaria/Train-and-Test-2 copy.ipynb",
+    "GAP/gap/BinomDatasetv2.py",
+    "GAP/gap/BinomDataset copy.py",
+    "replicate-supplementary-experiment.ipynb",
+    "reading-list/2006.10739v1.pdf",
+    "reading-list/2006.10739v1.pdf.crdownload",
+    "reading-list/List of formulas.md",
+    "reading-list/Notes-GAP-2307.06607.md",
+    "Untitled.md",
     "outputs/cov-lowres-sample2.png",
     "outputs/cov-train-gt.png",
     "outputs/cov-lowres-sample.png",
     "outputs/cov-train.png",
     "outputs/output-2.png",
     "outputs/output.png",
-    "outputs",
     "output-2.png",
     "2output-2.png",
-    "output.png",
-    "reading-list/Notes-GAP-2307.06607.md",
-    "reading-list/2307.06607v2.pdf",
-    "GAP/gap/__pycache__/BinomDataset.cpython-39.pyc.139689970308000",
-    "GAP/gap/__pycache__/inference.cpython-39.pyc",
-    "GAP/gap/__pycache__/inference.cpython-39.pyc.139976613271664",
-    "GAP/gap/__pycache__/BinomDataset.cpython-39.pyc",
-    "GAP/gap/__pycache__/BinomDataset.cpython-39.pyc.139976613293200",
-    "GAP/gap/__pycache__/GAP_UNET_ResBlock.cpython-39.pyc",
-    "GAP/gap/__pycache__",
-    "GAP/condaenv.u34b0r97.requirements.txt",
-    "Untitled.md"
+    "output.png"
   ]
 }

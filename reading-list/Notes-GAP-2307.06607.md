@@ -1,5 +1,6 @@
-Comprehensive Notes for [[2307.06607v2.pdf]]
+Comprehensive Notes for 2307.06607v2.pdf
 
+### Overview 
 - Fluorescence microscopy 
 	- Excitation light : light of specific wavelength
 	- Fluorophores : molecules that absorb the excitation light and emit light of higher wavelength (different color)
@@ -38,7 +39,7 @@ Comprehensive Notes for [[2307.06607v2.pdf]]
 	- MMSE : Minimum MSE leads to expectation over all possible clean images, compromising on the quality of the images.
 
 
-
+### Explanation of formulas
 - Pixels follow Poisson distribution
 	- $p(x_i \mid s_i) = \frac{s_i^{x_i} \exp(-s_i)}{x_i!}$
 	- where $x_i$ is the noisy image and $s_i$ is the clean image
@@ -65,25 +66,16 @@ Comprehensive Notes for [[2307.06607v2.pdf]]
 	- $p(i_t=i|s)=\frac{s_i}{\sum_{j=1}^ns_j}$
 	- $s_i$ is the $i^{th}$ pixel of the clean image
 	- here the ideal pixel probability is the normalized value of the clean image pixel $i$
-	
-
-
-
-	- $p(x_i \mid s_i) = \frac{s_i^{x_i} \exp(-s_i)}{x_i!}$
-	- $p(\mathbf{x} \mid \mathbf{s}) = \prod_{i=1}^{n} p(x_i \mid s_i)$
-	- $p(s|x) \propto p(x|s) p(s)$
-	- $s=\int p(s|x)s\,ds$
-	- $\prod_{i=1}^Tp(t_i|s)$
-	- $x_t=\sum_{i=1}^T\mathbb{1}(t_i=t)$
-	- $p(\{i\}|s,T)=\begin{cases}\prod_{t=1}^Tp(i=i_t|s)&T=|\{i\}|\\0&T\neq |\{i\}|\end{cases}$
-	- $p(\{i\}|s,T)=\begin{cases}\prod_{i=1}^np(i|s)^{x_i}&T=|\{i\}|\\0&T\neq |\{i\}|\end{cases}$
-	- $p(i_t=i|s)=\frac{s_i}{\sum_{j=1}^ns_j}$
-	- $p(\{i\}|T)=\begin{cases}\prod_{t=1}^Tp(i=i_t|i_1,\ldots,i_{t-1},T)&T=|\{i\}|\\0&T\neq |\{i\}|\end{cases}$
-	- $p(i = i_t|i_1, \ldots, i_{t-1}, T) = p(i = i_t|x_{t-1})$
-	- $p(i = i_t|x_{t-1}) = \int p(s|x_{t-1})p(i_t = i|s, x_{t-1}) \, ds$
-	- $p(i_t = i|s) = \frac{s_i}{\sum_{j=1}^n s_j}$
-	- $p(\{i\}|s, T) = \begin{cases} \prod_{t=1}^T p(i = i_t|s) & T = |\{i\}| \\ 0 & T \neq |\{i\}| \end{cases}$
+- Rewrite the equation of the image again, to consider the absence of clean images
+	- $p({i}|T)=\begin{cases}\prod_{t=1}^Tp(i=i_t|i_1,\ldots,i_{t-1},T)&T=|{i}|\\0&T\neq |{i}|\end{cases}$
+	- here we write it as probability of seeing pixel ${i}$ next in the sequence of photons
+- Loss function
 	- $L(\theta) = -\sum_{k=1}^m \sum_{i=1}^n \ln f_i(x_{\text{inp}}^k; \theta) x_{\text{tar},i}^k$
+	- $f_i$ is our model with parameters $\theta$, ${i}$ represents the pixel location
+	- $x_{inp}^k$ is the input noisy image with photons removed $x_{tar,i}^k$ is the target photon locations
+- Rewrite the Loss function to account for multiple photons as target
 	- $L(\theta) = -\sum_{k=1}^m \frac{1}{n|x_{\text{tar}}^k|} \sum_{i=1}^n \ln f_i(x_{\text{inp}}^k; \theta) x_{\text{tar},i}^k$
-	- 
-- 
+	- since $x_{tar,i}^k$ is no more one-hot representation of the next photon location we need to normalize the equation
+	- we divide the summation of pixels by ${n|x_{\text{tar}}^k|}$ to account for all the photon locations in the target
+
+
