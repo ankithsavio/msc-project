@@ -19,7 +19,7 @@ class BinomDataset(torch.utils.data.Dataset):
     '''
     def __init__(self, data, windowSize, minPSNR, maxPSNR, virtSize=None, augment = True, maxProb = 0.99):
         self.data = torch.from_numpy(data.astype(np.int32))
-        self.crop = transforms.RandomCrop(windowSize)
+        # self.crop = transforms.RandomCrop(windowSize)
         self.flipH = transforms.RandomHorizontalFlip()
         self.flipV = transforms.RandomVerticalFlip()
         self.minPSNR = minPSNR
@@ -40,7 +40,8 @@ class BinomDataset(torch.utils.data.Dataset):
         idx_ = idx 
         if self.virtSize is not None:
             idx_ = np.random.randint(self.data.shape[0]) # get random sample
-        img = self.crop(self.data[idx_]) # crop the sample 
+        # img = self.crop(self.data[idx_]) # crop the sample 
+        img = self.data[idx_]
         
         
         uniform = np.random.rand()*(self.maxPSNR-self.minPSNR)+self.minPSNR
