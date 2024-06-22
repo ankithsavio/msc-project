@@ -1,0 +1,177 @@
+{
+  "main": {
+    "id": "8fadf90c6711d67c",
+    "type": "split",
+    "children": [
+      {
+        "id": "1d9e9522a6db6b0a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3b7905f7c4663c19",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "Proposal/Proposal Mindmap.canvas",
+                "viewState": {
+                  "x": 234.9774772714391,
+                  "y": 551.9182729331638,
+                  "zoom": -1.535983622429106
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "4b97b90879b63515",
+    "type": "split",
+    "children": [
+      {
+        "id": "4b1a58eeabbd3dbb",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "67d2ef73debc11c9",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "f2e6fdd095cde0c8",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "59b494fc7d34eaa6",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "bc8614bb54d0dbd9",
+    "type": "split",
+    "children": [
+      {
+        "id": "4a8c6675687e0662",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "203814ed69717a37",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Proposal/Proposal Mindmap.canvas",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "5f37039faf8e8e83",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Proposal/Proposal Mindmap.canvas",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "a8188f47d1725691",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "f65fb8d9f86bcc9e",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Proposal/Proposal Mindmap.canvas"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "3b7905f7c4663c19",
+  "lastOpenFiles": [
+    "reading-list/Notes-GAP-2307.06607.md",
+    "GAP/gap/__pycache__/BinomDatasetv2.cpython-39.pyc.139984263568000",
+    "format-mass-spec-data.ipynb",
+    "GAP/gap/__pycache__/BinomDatasetv2.cpython-39.pyc",
+    "GAP/gap/__pycache__/BinomDatasetv2.cpython-39.pyc.140717114399712",
+    "GAP/examples/convallaria/Train-and-Test-4.ipynb",
+    "GAP/examples/convallaria/Train-and-Test-2 copy.ipynb",
+    "GAP/gap/BinomDatasetv2.py",
+    "GAP/gap/BinomDataset copy.py",
+    "replicate-supplementary-experiment.ipynb",
+    "reading-list/2006.10739v1.pdf",
+    "reading-list/List of formulas.md",
+    "Untitled.md",
+    "outputs/cov-lowres-sample2.png",
+    "outputs/cov-train-gt.png",
+    "outputs/cov-lowres-sample.png",
+    "outputs/cov-train.png",
+    "outputs/output-2.png",
+    "outputs/output.png",
+    "output-2.png",
+    "2output-2.png",
+    "output.png"
+  ]
+}
