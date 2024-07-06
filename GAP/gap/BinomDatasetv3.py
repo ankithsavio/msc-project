@@ -1,3 +1,7 @@
+'''
+Implements masking of samples.
+'''
+
 import torch as torch
 import numpy as np
 from torchvision import transforms
@@ -17,7 +21,7 @@ class BinomDataset(torch.utils.data.Dataset):
             Returns:
                     dataset
     '''
-    def __init__(self, data, windowSize, minPSNR, maxPSNR, virtSize=None, augment = True, maxProb = 0.99):
+    def __init__(self, data, windowSize, minPSNR, maxPSNR, mask, virtSize=None, augment = True, maxProb = 0.99):
         self.data = torch.from_numpy(data.astype(np.int32))
         self.crop = transforms.RandomCrop(windowSize)
         self.flipH = transforms.RandomHorizontalFlip()
@@ -29,7 +33,8 @@ class BinomDataset(torch.utils.data.Dataset):
         self.std = data.std()
         self.virtSize = virtSize
         self.augment = augment
-    
+        self.mask = mask    
+
     def __len__(self): 
         if self.virtSize is not None:
             return self.virtSize
@@ -41,14 +46,12 @@ class BinomDataset(torch.utils.data.Dataset):
         if self.virtSize is not None:
             idx_ = np.random.randint(self.data.shape[0]) # get random sample
         img = self.crop(self.data[idx_]) # crop the sample 
-        # img = self.data[idx_]
         
         uniform = np.random.rand()*(self.maxPSNR-self.minPSNR)+self.minPSNR
 
         level = (10**(uniform/10.0))/ (img.type(torch.float).mean().item()+1e-5)
         level = min(level, self.maxProb)
 
-        
         binom = torch.distributions.binomial.Binomial(total_count=img, probs=torch.tensor([level]))
         imgNoise = binom.sample()
         
@@ -56,12 +59,14 @@ class BinomDataset(torch.utils.data.Dataset):
         img = img / (img.mean()+1e-8)
         
         imgNoise = imgNoise[None,...].type(torch.float)
-        out = torch.cat((img, imgNoise),dim = 0)
+
+        out = torch.cat((img * self.mask, img * (1 - self.mask) ,imgNoise * self.mask),dim = 0)
         
         if not self.augment:
-            return out
+            return out 
         else:    
             if np.random.rand()<0.5:
                 out = torch.transpose(out,-1,-2)
 
-            return self.flipV(self.flipH(out))
+            return self.flipV(self.flipH(out)) 
+
