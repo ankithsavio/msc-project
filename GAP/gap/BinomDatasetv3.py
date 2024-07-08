@@ -5,6 +5,7 @@ Implements masking of samples.
 import torch as torch
 import numpy as np
 from torchvision import transforms
+from tasks import inpainting
 
 class BinomDataset(torch.utils.data.Dataset):
     '''
@@ -33,7 +34,7 @@ class BinomDataset(torch.utils.data.Dataset):
         self.std = data.std()
         self.virtSize = virtSize
         self.augment = augment
-        self.mask = mask    
+        self.mask_gen = inpainting()    
 
     def __len__(self): 
         if self.virtSize is not None:
@@ -60,7 +61,9 @@ class BinomDataset(torch.utils.data.Dataset):
         
         imgNoise = imgNoise[None,...].type(torch.float)
 
-        out = torch.cat((img * self.mask, img * (1 - self.mask) ,imgNoise * self.mask),dim = 0)
+        mask = self.mask_gen.generate_mask()
+
+        out = torch.cat((mask, img * mask, img * (1 - mask) ,imgNoise * mask),dim = 0)
         
         if not self.augment:
             return out 

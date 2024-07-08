@@ -47,7 +47,7 @@ def conv3x3(in_channels, out_channels, stride=1,
     return nn.Conv2d(
         in_channels,
         out_channels,
-        kernel_size=5,
+        kernel_size=3,
         stride=stride,
         padding=padding,
         bias=bias,
@@ -172,7 +172,7 @@ class UN(pl.LightningModule):
         the tranpose convolution (specified by upmode='transpose')
     """
 
-    def __init__(self, levels, mask, channels=3, depth=5, 
+    def __init__(self, levels, channels=3, depth=5, 
                  start_filts=64, up_mode='transpose', 
                  merge_mode='add'):
         """
@@ -189,8 +189,6 @@ class UN(pl.LightningModule):
         self.save_hyperparameters()
         
         super(UN, self).__init__()
-
-        self.mask = mask
         
         if up_mode in ('transpose', 'upsample'):
             self.up_mode = up_mode
@@ -308,8 +306,8 @@ class UN(pl.LightningModule):
         }
     
     
-    def photonLoss(self,result, target):
-        mask = self.mask[None].detach()
+    def photonLoss(self,result, target, mask):
+        mask = mask.to('cuda').detach()
         result = result * mask
         target = target * mask ## mask should have been applied from the dataset - check!
         expEnergy = torch.exp(result)
@@ -324,14 +322,14 @@ class UN(pl.LightningModule):
         return torch.mean((expEnergy-target)**2)
     
     def training_step(self, batch, batch_idx):
-        loss = self.photonLoss(self(batch[:,self.channels:,...]),batch[:,:self.channels,...] )
+        loss = self.photonLoss(self(batch[:,self.channels + 1:,...]),batch[:,1:self.channels + 1,...], batch[:,0,...])
         self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        loss = self.photonLoss(self(batch[:,self.channels:,...]),batch[:,:self.channels,...] )
+        loss = self.photonLoss(self(batch[:,self.channels + 1:,...]),batch[:,1:self.channels + 1,...], batch[:,0,...] )
         self.log("val_loss", loss)
 
     def test_step(self, batch, batch_idx):
-        loss = self.photonLoss(self(batch[:,self.channels:,...]),batch[:,:self.channels,...] )
+        loss = self.photonLoss(self(batch[:,self.channels + 1:,...]),batch[:,1:self.channels + 1,...], batch[:,0,...] )
         self.log("test_loss", loss)
