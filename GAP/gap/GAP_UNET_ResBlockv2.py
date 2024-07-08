@@ -47,7 +47,7 @@ def conv3x3(in_channels, out_channels, stride=1,
     return nn.Conv2d(
         in_channels,
         out_channels,
-        kernel_size=3,
+        kernel_size=5,
         stride=stride,
         padding=padding,
         bias=bias,
@@ -309,10 +309,9 @@ class UN(pl.LightningModule):
     
     
     def photonLoss(self,result, target):
-        mask = self.mask[None]
-        with torch.no_grad():
-            result = result * mask
-            target = target * mask ## mask should have been applied from the dataset - check!
+        mask = self.mask[None].detach()
+        result = result * mask
+        target = target * mask ## mask should have been applied from the dataset - check!
         expEnergy = torch.exp(result)
         perImage =  -torch.mean(result*target, dim =(-1,-2,-3), keepdims = True )
         perImage += torch.log(torch.mean(expEnergy, dim =(-1,-2,-3), keepdims = True ))*torch.mean(target, dim =(-1,-2,-3), keepdims = True )
