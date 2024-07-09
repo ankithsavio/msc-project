@@ -43,11 +43,11 @@ from torch.nn import init
 import numpy as np
 
 def conv3x3(in_channels, out_channels, stride=1, 
-            padding=1, bias=True, groups=1):    
+            padding=2, bias=True, groups=1):    
     return nn.Conv2d(
         in_channels,
         out_channels,
-        kernel_size=3,
+        kernel_size=5,
         stride=stride,
         padding=padding,
         bias=bias,
