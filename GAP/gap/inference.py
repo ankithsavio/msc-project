@@ -57,6 +57,7 @@ def sample_image(input_image,
         denoised = denoised - denoised.max()
         denoised = torch.exp(denoised)   
         denoised = denoised / (denoised.sum(dim=(-1,-2,-3), keepdim = True))
+        print(denoised.shape)
         
 
         # here we save an image into our stack
@@ -76,7 +77,8 @@ def sample_image(input_image,
         new_photons = torch.poisson(denoised*(photnum)) 
         
         # add new photons
-        photons = photons + new_photons 
+        photons = photons + new_photons
+        print(photons.shape) 
         
     
     return denoised[...].detach().cpu().numpy(), photons[...].detach().cpu().numpy(), stack, i

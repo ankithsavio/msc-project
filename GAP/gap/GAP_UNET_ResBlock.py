@@ -268,7 +268,9 @@ class UN(pl.LightningModule):
         epsilon = 1
         
         stack = None
-        
+        ## use of fourier transform to avoid transform
+        ## no matter what value it lives in the sine wave
+        ## the input is represented by sin transformation of different frequencies
         factor = 10.0
         for i in range (self.levels):
             scale = x.clone()*(factor**(-i))
