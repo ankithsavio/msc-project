@@ -223,7 +223,7 @@ class UN(pl.LightningModule):
 
         # create the encoder pathway and add to a list
         for i in range(depth):
-            ins = self.channels * self.levels * 2 if i == 0 else outs
+            ins = self.channels * self.levels * 3 if i == 0 else outs
             outs = self.start_filts*(2**i)
 #            outs = self.start_filts
             pooling = True if i < depth-1 else False
