@@ -70,7 +70,7 @@ def sample_image(input_image,
             combi = torch.cat((photsave,imgsave),1)
             stack.append(combi.numpy())
 
-        # increase photon number
+        # increase photon number    
         photnum = max(beta* photons.sum(),1)
         
         # draw new photons

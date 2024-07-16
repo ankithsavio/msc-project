@@ -12,11 +12,12 @@ class inpainting:
     
     def randombbox(self):
         imgsize = self.imgsize
-        maxr = imgsize - self.masksize
+        masksize = np.random.randint(low= self.masksize - (self.masksize * 0.1), high= self.masksize + (self.masksize * 0.3))
+        maxr = imgsize - masksize
         t = int(np.random.uniform(size = [], low=0, high=maxr).tolist())
         l = int(np.random.uniform(size = [], low=0, high=maxr).tolist())
-        h = int(self.masksize)
-        w = int(self.masksize)
+        h = int(masksize)
+        w = int(masksize)
         return (t, l, h, w)
     
     def generate_mask(self):

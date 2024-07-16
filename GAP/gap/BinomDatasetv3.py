@@ -20,7 +20,7 @@ class BinomDataset(torch.utils.data.Dataset):
                     augment (bool): use 8-fold data augmentation (default is False) 
                     maxProb (float): the maximum success probability for binomial splitting
             Returns:
-                    dataset
+                    dataset: (mask, masked_img, invmasked_img, noisy_img)
     '''
     def __init__(self, data, windowSize, minPSNR, maxPSNR, mask, virtSize=None, augment = True, maxProb = 0.99):
         self.data = torch.from_numpy(data.astype(np.int32))
