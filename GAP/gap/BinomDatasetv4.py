@@ -22,7 +22,7 @@ class BinomDataset(torch.utils.data.Dataset):
             Returns:
                     dataset: (mask, masked_img, invmasked_img, noisy_img)
     '''
-    def __init__(self, data, windowSize, minPSNR, maxPSNR, mask, virtSize=None, augment = True, maxProb = 0.99):
+    def __init__(self, data, windowSize, minPSNR, maxPSNR, virtSize=None, augment = True, maxProb = 0.99):
         self.data = torch.from_numpy(data.astype(np.int32))
         self.crop = transforms.RandomCrop(windowSize)
         self.flipH = transforms.RandomHorizontalFlip()
@@ -53,6 +53,9 @@ class BinomDataset(torch.utils.data.Dataset):
         level = (10**(uniform/10.0))/ (img.type(torch.float).mean().item()+1e-5)
         level = min(level, self.maxProb)
 
+        gt = img.copy()[None,...].type(torch.float)
+        gt = gt / (gt.mean()+1e-8)
+
         binom = torch.distributions.binomial.Binomial(total_count=img, probs=torch.tensor([level]))
         imgNoise = binom.sample()
         
@@ -63,7 +66,7 @@ class BinomDataset(torch.utils.data.Dataset):
 
         mask = self.mask_gen.generate_mask()
 
-        out = torch.cat((mask, img * mask, img * (1 - mask) ,imgNoise * mask),dim = 0)
+        out = torch.cat((img, mask, gt * (1 - mask) ,imgNoise),dim = 0)
         
         if not self.augment:
             return out 
