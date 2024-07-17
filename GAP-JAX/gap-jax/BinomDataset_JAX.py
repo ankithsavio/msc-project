@@ -35,10 +35,6 @@ class BinomDataset(torch.utils.data.Dataset):
             return self.virtSize
         else:
             return self.data.shape[0]
-    
-    @staticmethod
-    def collate_fn(x):
-        return np.expand_dims(np.array(x, dtype=np.float32), axis=3)
 
     def __getitem__(self, idx):
         idx_ = idx 
@@ -63,9 +59,9 @@ class BinomDataset(torch.utils.data.Dataset):
         out = torch.cat((img, imgNoise),dim = 0)
         
         if not self.augment:
-            return self.collate_fn(out)
+            return out.permute(1, 2, 0).numpy()
         else:    
             if np.random.rand()<0.5:
                 out = torch.transpose(out,-1,-2)
 
-            return self.collate_fn(self.flipV(self.flipH(out)))
+            return self.flipV(self.flipH(out)).permute(1, 2, 0).numpy()
