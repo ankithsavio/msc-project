@@ -59,9 +59,9 @@ class BinomDataset(torch.utils.data.Dataset):
         out = torch.cat((img, imgNoise),dim = 0)
         
         if not self.augment:
-            return out.permute(1, 2, 0).numpy()
-        else:    
+            return out.permute(1, 2, 0)
+        else:
             if np.random.rand()<0.5:
                 out = torch.transpose(out,-1,-2)
 
-            return self.flipV(self.flipH(out)).permute(1, 2, 0).numpy()
+            return self.flipV(self.flipH(out)).permute(1, 2, 0)
