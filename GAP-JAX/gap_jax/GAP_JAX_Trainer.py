@@ -107,7 +107,7 @@ class Trainer:
             grad_fn = jax.value_and_grad(compute_loss)
             loss, grads = grad_fn(state.params)
 
-            state = state.apply_gradients(grads = grads)
+            state = state.apply_gradients(grads = grads, value = loss)
             return state, loss
         
         def eval_step(state, batch):
@@ -148,6 +148,8 @@ class Trainer:
         ''' 
         Save the checkpoints of the model 
         '''
+        if not os.path.exists(self.root_dir):
+            os.makedirs(self.root_dir)
         checkpoints.save_checkpoint(ckpt_dir=self.root_dir,
                                     target=self.state.params,
                                     step=step,
