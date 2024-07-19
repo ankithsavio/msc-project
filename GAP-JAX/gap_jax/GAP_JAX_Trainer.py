@@ -56,7 +56,7 @@ class Trainer:
                          optax.adam(learning_rate= self.learning_rate),
                          optax.contrib.reduce_on_plateau(factor = 0.5))
         
-        self.state = train_state.TrainState.create(apply_fn= self.model.apply_fn,
+        self.state = train_state.TrainState.create(apply_fn= self.state.apply_fn,
                                                    params= self.state.params,
                                                    tx= tx)
     
