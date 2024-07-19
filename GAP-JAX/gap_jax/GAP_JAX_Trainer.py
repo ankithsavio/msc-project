@@ -9,6 +9,27 @@ import optax
 from tqdm.auto import tqdm
 from torch.utils.tensorboard import SummaryWriter
 
+class TrainState(train_state.TrainState):
+    value: jnp.array = None  # Add an additional attribute to store the metric value
+
+    def apply_gradients(self, *, grads, value, **kwargs):
+        """
+          value: The metric value to be passed to the learning rate scheduler.
+        """
+        updates, new_opt_state = self.tx.update(
+            grads, self.opt_state, self.params, value=value
+        )
+        new_params = optax.apply_updates(self.params, updates)
+
+        return self.replace(
+            step=self.step + 1,
+            params=new_params,
+            opt_state=new_opt_state,
+            value=value,
+            **kwargs,
+        )
+
+
 class Trainer:
     ''' 
     Credits for Trainer Module : https://github.com/phlippe/jax_trainer
@@ -42,11 +63,11 @@ class Trainer:
         '''
         init_rng = jax.random.key(self.seed)
         params = self.model.init(init_rng, self.img)
-        self.state = train_state.TrainState(step=0,
-                                            apply_fn=self.model.apply,
-                                            params=params,
-                                            tx=None,
-                                            opt_state=None)
+        self.state = TrainState(step=0,
+                                apply_fn=self.model.apply,
+                                params=params,
+                                tx=None,
+                                opt_state=None)
     
     def init_optimizer(self):
         ''' 
@@ -56,10 +77,10 @@ class Trainer:
                          optax.adam(learning_rate= self.learning_rate),
                          optax.contrib.reduce_on_plateau(factor = 0.5))
         
-        self.state = train_state.TrainState.create(apply_fn= self.state.apply_fn,
-                                                   params= self.state.params,
-                                                   tx= tx)
-    
+        self.state = TrainState.create(apply_fn= self.state.apply_fn,
+                                       params= self.state.params,
+                                       tx= tx)
+
     def photonLoss(self, result, target):
         ''' 
         GAP PhotonLoss
@@ -138,9 +159,9 @@ class Trainer:
         '''
         state_dict = checkpoints.restore_checkpoint(ckpt_dir=f'{self.root_dir}.ckpt',
                                                     target=self.state.params)
-        self.state = train_state.TrainState.create(apply_fn=self.state.apply_fn,
-                                                   params=state_dict,
-                                                   tx=self.state.tx)
+        self.state = TrainState.create(apply_fn=self.state.apply_fn,
+                                       params=state_dict,
+                                       tx=self.state.tx)
 
     def checkpoint_exists(self):
         return os.path.isfile(f'{self.root_dir}.ckpt')
