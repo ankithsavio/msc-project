@@ -1,3 +1,6 @@
+''' 
+    Credits for Trainer Module : https://github.com/phlippe/jax_trainer
+'''
 import os
 import jax
 import jax.numpy as jnp
@@ -9,8 +12,9 @@ import optax
 from tqdm.auto import tqdm
 from torch.utils.tensorboard import SummaryWriter
 
+
 class TrainState(train_state.TrainState):
-    value: jnp.array = None  # Add an additional attribute to store the metric value
+    value: jnp.array = None 
 
     def apply_gradients(self, *, grads, value, **kwargs):
         """
@@ -31,21 +35,20 @@ class TrainState(train_state.TrainState):
 
 
 class Trainer:
-    ''' 
-    Credits for Trainer Module : https://github.com/phlippe/jax_trainer
-    '''
+
     def __init__(self, root_dir, gradient_clip_val, epochs, dataloader, model: nn.Module, lr = 1e-4, seed = 42, channels = 1, early_stop = 1000):
         super().__init__()
         self.root_dir = root_dir
         self.gradient_clip_val = gradient_clip_val
         self.max_epochs = epochs
+        self.steps_per_epoch = len(dataloader)
         self.dummy_img = jnp.ones(next(iter(dataloader))[-1:,:,:,channels:].shape)
         self.learning_rate= lr
         self.seed = seed
         self.channels = channels
         self.platform = jax.local_devices()[0].platform
         self.model = model
-        # self.logger = SummaryWriter(log_dir= self.root_dir)
+        self.logger = SummaryWriter(log_dir= self.root_dir)
         self.earlystop = EarlyStopping(min_delta= 1e-3, patience= early_stop)
         self.init_model()
         self.init_optimizer()
@@ -79,7 +82,8 @@ class Trainer:
         tx = optax.chain(optax.adam(learning_rate= self.learning_rate),
                          optax.clip(self.gradient_clip_val),
                          optax.contrib.reduce_on_plateau(factor = 0.5,
-                                                         patience= 10),
+                                                         patience= 10 * self.steps_per_epoch,
+                                                         accumulation_size= self.steps_per_epoch),
                         )
         
         self.state = TrainState.create(apply_fn= self.state.apply_fn,
@@ -133,11 +137,10 @@ class Trainer:
         avg_loss = 0
         for batch in tqdm(train_loader, desc='Training', leave=False):
             self.state, loss = self.train_step(self.state, batch)
-            print(f'\nTrain Step Loss: {loss}\n')
             avg_loss += loss
         avg_loss /= len(train_loader)
         print(f'\nTrain Avg Loss: {avg_loss}\n')
-        # self.logger.add_scalar('Loss/train ', avg_loss.item(), global_step=epoch)
+        self.logger.add_scalar('Loss/train ', avg_loss.item(), global_step=epoch)
 
     def eval_model(self, data_loader):
         ''' 
@@ -180,7 +183,7 @@ class Trainer:
             self.train_epoch(train_loader, epoch=epoch_idx)
             if epoch_idx % 1 == 0:
                 eval_ploss = self.eval_model(val_loader)
-                # self.logger.add_scalar('Loss/val', eval_ploss, global_step=epoch_idx)
+                self.logger.add_scalar('Loss/val', eval_ploss, global_step=epoch_idx)
                 print(f'\nVal Loss: {eval_ploss}\n')
 
                 self.earlystop = self.earlystop.update(eval_ploss)
@@ -189,6 +192,6 @@ class Trainer:
                     self.save_model(step=epoch_idx)
                 if self.earlystop.should_stop:
                     print(f'Met early stopping criteria, breaking at epoch {epoch_idx}')
-                    # self.logger.flush()
+                    self.logger.flush()
                     break
-            # self.logger.flush()
+            self.logger.flush()
