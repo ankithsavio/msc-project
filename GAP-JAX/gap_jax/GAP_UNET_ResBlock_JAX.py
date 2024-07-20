@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 import flax.linen as nn
 
-def conv3x3(in_channels, out_channels, stride = 1, padding = 1, bias = True):
+def conv3x3(out_channels, stride = 1, padding = 1, bias = True):
     return nn.Conv(features= out_channels,
                    kernel_size= (3, 3), 
                    strides= (stride, stride),
@@ -15,10 +15,10 @@ def conv3x3(in_channels, out_channels, stride = 1, padding = 1, bias = True):
                    kernel_init= nn.initializers.xavier_normal(),
                    bias_init= nn.initializers.constant(0))
 
-def conv1x1(in_channels, out_channels):
+def conv1x1(out_channels):
     return nn.Conv(features= out_channels, 
-                   kernel_size= 1,
-                   strides= 1,
+                   kernel_size= (1, 1),
+                   strides= (1, 1),
                    kernel_init= nn.initializers.xavier_normal(),
                    bias_init= nn.initializers.constant(0))
 
@@ -32,7 +32,7 @@ class Upsample(nn.Module):
         shape = (shape[0], shape[1]*self.scale, shape[2]*self.scale, shape[3])
         return jax.image.resize(image = x, shape = shape, method = self.method)
 
-def upconv2x2(in_channels, out_channels, mode='transpose'):
+def upconv2x2(out_channels, mode='transpose'):
     '''
     Upsample not implemented, need to find alternative
     '''
@@ -42,17 +42,16 @@ def upconv2x2(in_channels, out_channels, mode='transpose'):
                             strides= (2, 2))
     else:
         return nn.Sequential([Upsample(method = 'bilinear', scale = 2),
-                              conv1x1(in_channels, out_channels)])
+                              conv1x1(out_channels)])
 
 class DownConv(nn.Module):
-    in_channels : int
     out_channels : int
-    pooling : bool
+    pooling : bool = True
 
     def setup(self):
-        self.conv1 = conv3x3(self.in_channels, self.out_channels)
-        self.conv2 = conv3x3(self.out_channels, self.out_channels)
-        self.conv3 = conv3x3(self.out_channels, self.out_channels)
+        self.conv1 = conv3x3(self.out_channels)
+        self.conv2 = conv3x3(self.out_channels)
+        self.conv3 = conv3x3(self.out_channels)
 
     def __call__(self, x):
         
@@ -70,16 +69,15 @@ class DownConv(nn.Module):
 
 
 class UpConv(nn.Module):
-    in_channels : int
     out_channels : int
     merge_mode : str = 'concat'
     up_mode : str = 'transpose'
 
     def setup(self):
-        self.upconv = upconv2x2(self.in_channels, self.out_channels,mode=self.up_mode)
-        self.conv1 = conv3x3(self.out_channels, self.out_channels) ## refine for flax
-        self.conv2 = conv3x3(self.out_channels, self.out_channels)
-        self.conv3 = conv3x3(self.out_channels, self.out_channels)
+        self.upconv = upconv2x2(self.out_channels,mode=self.up_mode)
+        self.conv1 = conv3x3(self.out_channels) 
+        self.conv2 = conv3x3(self.out_channels)
+        self.conv3 = conv3x3(self.out_channels)
 
     def __call__(self, from_down, from_up):
         
@@ -127,22 +125,22 @@ class UN(nn.Module):
         up_convs = []
 
         for i in range(self.depth):
-            ins = self.channels * self.levels if i == 0 else outs
+            # ins = self.channels * self.levels if i == 0 else outs
             outs = self.start_filts*(2**i)
             pooling = True if i < self.depth-1 else False
 
-            module = DownConv(ins, outs, pooling=pooling)
+            module = DownConv(outs, pooling=pooling)
             down_convs.append(module)
         self.down_convs = down_convs
 
         for i in range(self.depth-1):
-            ins = outs
-            outs = ins // 2
-            module = UpConv(ins, outs, up_mode=self.up_mode,merge_mode=self.merge_mode)
+            # ins = outs
+            outs = outs // 2
+            module = UpConv(outs, up_mode=self.up_mode,merge_mode=self.merge_mode)
             up_convs.append(module)
         self.up_convs = up_convs
 
-        self.conv_final = conv1x1(outs, self.channels)
+        self.conv_final = conv1x1(self.channels)
 
 
 

@@ -39,17 +39,17 @@ class Trainer:
         self.root_dir = root_dir
         self.gradient_clip_val = gradient_clip_val
         self.max_epochs = epochs
-        self.img = next(iter(dataloader))[-1:,:,:,channels:]
+        self.dummy_img = jnp.ones(next(iter(dataloader))[-1:,:,:,channels:].shape)
         self.learning_rate= lr
         self.seed = seed
         self.channels = channels
         self.platform = jax.local_devices()[0].platform
         self.model = model
-        self.logger = SummaryWriter(log_dir= self.root_dir)
+        # self.logger = SummaryWriter(log_dir= self.root_dir)
         self.earlystop = EarlyStopping(min_delta= 1e-3, patience= early_stop)
-        self.init_training()
         self.init_model()
         self.init_optimizer()
+        self.init_training()
         if self.platform == 'gpu': 
             print(f'GPU detected with {jax.process_count()} Device(s).')
         elif self.platform == 'tpu':
@@ -63,7 +63,9 @@ class Trainer:
         Initializes the Unet model for GAP training
         '''
         init_rng = jax.random.key(self.seed)
-        params = self.model.init(init_rng, self.img)
+        key, _ = jax.random.split(init_rng)
+        print(f'\nUsing Dummy data of shape : {self.dummy_img.shape}')
+        params = self.model.init(key, self.dummy_img)
         self.state = TrainState(step=0,
                                 apply_fn=self.model.apply,
                                 params=params,
@@ -74,9 +76,11 @@ class Trainer:
         ''' 
         Initializes adam optimizer with gradient clipping and learning rate schedule to reduce on plateau
         '''
-        tx = optax.chain(optax.clip(self.gradient_clip_val),
-                         optax.adam(learning_rate= self.learning_rate),
-                         optax.contrib.reduce_on_plateau(factor = 0.5))
+        tx = optax.chain(optax.adam(learning_rate= self.learning_rate),
+                         optax.clip(self.gradient_clip_val),
+                         optax.contrib.reduce_on_plateau(factor = 0.5,
+                                                         patience= 10),
+                        )
         
         self.state = TrainState.create(apply_fn= self.state.apply_fn,
                                        params= self.state.params,
@@ -129,21 +133,22 @@ class Trainer:
         avg_loss = 0
         for batch in tqdm(train_loader, desc='Training', leave=False):
             self.state, loss = self.train_step(self.state, batch)
+            print(f'\nTrain Step Loss: {loss}\n')
             avg_loss += loss
         avg_loss /= len(train_loader)
-        self.logger.add_scalar('Loss/train ', avg_loss.item(), global_step=epoch)
+        print(f'\nTrain Avg Loss: {avg_loss}\n')
+        # self.logger.add_scalar('Loss/train ', avg_loss.item(), global_step=epoch)
 
     def eval_model(self, data_loader):
         ''' 
         Evaluates the model for the given validation dataloader
         '''
-        avg_ploss, count = 0, 0
+        avg_ploss = 0
         for batch in data_loader:
             ploss = self.eval_step(self.state, batch)
-            avg_ploss += ploss * batch[0].shape[0]
-            count += batch[0].shape[0]
-        eval_ploss = (avg_ploss / count).item()
-        return eval_ploss
+            avg_ploss += ploss 
+        eval_ploss = avg_ploss/len(data_loader)
+        return eval_ploss.item()
 
     def save_model(self, step=0):
         ''' 
@@ -175,12 +180,15 @@ class Trainer:
             self.train_epoch(train_loader, epoch=epoch_idx)
             if epoch_idx % 1 == 0:
                 eval_ploss = self.eval_model(val_loader)
-                self.logger.add_scalar('Loss/val', eval_ploss, global_step=epoch_idx)
+                # self.logger.add_scalar('Loss/val', eval_ploss, global_step=epoch_idx)
+                print(f'\nVal Loss: {eval_ploss}\n')
+
                 self.earlystop = self.earlystop.update(eval_ploss)
                 if eval_ploss <= best_eval:
                     best_eval = eval_ploss
                     self.save_model(step=epoch_idx)
                 if self.earlystop.should_stop:
                     print(f'Met early stopping criteria, breaking at epoch {epoch_idx}')
+                    # self.logger.flush()
                     break
-            self.logger.flush()
+            # self.logger.flush()
