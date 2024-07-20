@@ -34,21 +34,22 @@ class Trainer:
     ''' 
     Credits for Trainer Module : https://github.com/phlippe/jax_trainer
     '''
-    def __init__(self, root_dir, gradient_clip_val, epochs, dataloader, model: nn.Module, lr = 1e-4, seed = 42, channels = 1):
+    def __init__(self, root_dir, gradient_clip_val, epochs, dataloader, model: nn.Module, lr = 1e-4, seed = 42, channels = 1, early_stop = 1000):
         super().__init__()
         self.root_dir = root_dir
         self.gradient_clip_val = gradient_clip_val
         self.max_epochs = epochs
-        self.img = next(iter(dataloader))[:,:,:,channels:]
+        self.img = next(iter(dataloader))[-1:,:,:,channels:]
         self.learning_rate= lr
         self.seed = seed
         self.channels = channels
         self.platform = jax.local_devices()[0].platform
         self.model = model
         self.logger = SummaryWriter(log_dir= self.root_dir)
-        self.earlystop = EarlyStopping(min_delta= 1e-3, patience= 10)
+        self.earlystop = EarlyStopping(min_delta= 1e-3, patience= early_stop)
         self.init_training()
         self.init_model()
+        self.init_optimizer()
         if self.platform == 'gpu': 
             print(f'GPU detected with {jax.process_count()} Device(s).')
         elif self.platform == 'tpu':
@@ -159,7 +160,7 @@ class Trainer:
         ''' 
         Loads the checkpoints of the model and creates its state
         '''
-        state_dict = checkpoints.restore_checkpoint(ckpt_dir=f'{self.root_dir}.ckpt',
+        state_dict = checkpoints.restore_checkpoint(ckpt_dir=self.root_dir,
                                                     target=self.state.params)
         self.state = TrainState.create(apply_fn=self.state.apply_fn,
                                        params=state_dict,
@@ -169,7 +170,6 @@ class Trainer:
         return os.path.isfile(f'{self.root_dir}.ckpt')
 
     def train_model(self, train_loader, val_loader):
-        self.init_optimizer()
         best_eval = 1e6
         for epoch_idx in tqdm(range(1, self.max_epochs +1)):
             self.train_epoch(train_loader, epoch=epoch_idx)
