@@ -79,8 +79,8 @@ class Trainer:
         ''' 
         Initializes adam optimizer with gradient clipping and learning rate schedule to reduce on plateau
         '''
-        tx = optax.chain(optax.adam(learning_rate= self.learning_rate),
-                         optax.clip(self.gradient_clip_val),
+        tx = optax.chain(optax.clip(self.gradient_clip_val),
+                         optax.adam(learning_rate= self.learning_rate),
                          optax.contrib.reduce_on_plateau(factor = 0.5,
                                                          patience= 10 * self.steps_per_epoch,
                                                          accumulation_size= self.steps_per_epoch),
