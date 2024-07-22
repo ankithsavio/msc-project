@@ -12,15 +12,15 @@ def conv3x3(out_channels, stride = 1, padding = 1, bias = True):
                    strides= (stride, stride),
                    padding= padding,
                    use_bias= bias,
-                   kernel_init= nn.initializers.xavier_normal(),
-                   bias_init= nn.initializers.constant(0))
+                   kernel_init= nn.initializers.xavier_normal(dtype = jnp.float32),
+                   bias_init= nn.initializers.constant(value= 0, dtype = jnp.float32))
 
 def conv1x1(out_channels):
-    return nn.Conv(features= out_channels, 
+    return nn.Conv(features= out_channels,  
                    kernel_size= (1, 1),
                    strides= (1, 1),
-                   kernel_init= nn.initializers.xavier_normal(),
-                   bias_init= nn.initializers.constant(0))
+                   kernel_init= nn.initializers.xavier_normal(dtype = jnp.float32),
+                   bias_init= nn.initializers.constant(value=0, dtype = jnp.float32))
 
 class Upsample(nn.Module):
     method : str = 'bilinear'
@@ -38,8 +38,10 @@ def upconv2x2(out_channels, mode='transpose'):
     '''
     if mode == 'transpose':
         return nn.ConvTranspose(features= out_channels,
-                            kernel_size= (2, 2),
-                            strides= (2, 2))
+                                kernel_size= (2, 2),
+                                strides= (2, 2),
+                                kernel_init= nn.initializers.xavier_normal(dtype = jnp.float32),
+                                bias_init= nn.initializers.constant(value= 0, dtype = jnp.float32))
     else:
         return nn.Sequential([Upsample(method = 'bilinear', scale = 2),
                               conv1x1(out_channels)])

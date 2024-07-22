@@ -79,7 +79,7 @@ class Trainer:
         ''' 
         Initializes adam optimizer with gradient clipping and learning rate schedule to reduce on plateau
         '''
-        tx = optax.chain(optax.clip(self.gradient_clip_val),
+        tx = optax.chain(optax.clip_by_global_norm(self.gradient_clip_val),
                          optax.adam(learning_rate= self.learning_rate),
                          optax.contrib.reduce_on_plateau(factor = 0.5,
                                                          patience= 10 * self.steps_per_epoch,
@@ -95,8 +95,8 @@ class Trainer:
         GAP PhotonLoss
         '''
         expEnergy = jnp.exp(result)
-        perImage = -jnp.mean(result*target, axis = (-1, -2, -3), keepdims=True)
-        perImage += jnp.log(jnp.mean(expEnergy, axis = (-1, -2, -3), keepdims= True))*jnp.mean(target, axis = (-1, -2, -3), keepdims= True)
+        perImage = -jnp.mean(result*target, axis = (-2, -3, -1), keepdims=True)
+        perImage += jnp.log(jnp.mean(expEnergy, axis = (-2, -3, -1), keepdims= True))*jnp.mean(target, axis = (-2, -3, -1), keepdims= True)
 
         return jnp.mean(perImage)
     
@@ -135,12 +135,13 @@ class Trainer:
         Trains the model for the given training dataloader
         '''
         avg_loss = 0
-        for batch in tqdm(train_loader, desc='Training', leave=False):
+        for i, batch in enumerate(tqdm(train_loader, desc='Training', leave=False)):
             self.state, loss = self.train_step(self.state, batch)
+            self.logger.add_scalar('Loss/train_per_step ', loss.item(), global_step=i)
             avg_loss += loss
         avg_loss /= len(train_loader)
         print(f'\nTrain Avg Loss: {avg_loss}\n')
-        self.logger.add_scalar('Loss/train ', avg_loss.item(), global_step=epoch)
+        self.logger.add_scalar('Loss/train_per_epoch ', avg_loss.item(), global_step=epoch)
 
     def eval_model(self, data_loader):
         ''' 
