@@ -11,6 +11,9 @@ from flax.training import checkpoints
 import optax
 from tqdm.auto import tqdm
 from torch.utils.tensorboard import SummaryWriter
+import orbax.checkpoint as ocp
+from flax.training import orbax_utils
+
 
 
 class TrainState(train_state.TrainState):
@@ -53,6 +56,9 @@ class Trainer:
         self.init_model()
         self.init_optimizer()
         self.init_training()
+        orbax_checkpointer = ocp.PyTreeCheckpointer()
+        options = ocp.CheckpointManagerOptions(max_to_keep=2, create=True)
+        self.checkpoint_manager = ocp.CheckpointManager(f'{self.root_dir}orbax/managed', orbax_checkpointer, options)
         if self.platform == 'gpu': 
             print(f'GPU detected with {jax.process_count()} Device(s).')
         elif self.platform == 'tpu':
@@ -82,7 +88,7 @@ class Trainer:
         tx = optax.chain(optax.clip_by_global_norm(self.gradient_clip_val),
                          optax.adam(learning_rate= self.learning_rate),
                          optax.contrib.reduce_on_plateau(factor = 0.5,
-                                                         patience= 10 * self.steps_per_epoch,
+                                                         patience= 10,
                                                          accumulation_size= self.steps_per_epoch),
                         )
         
@@ -94,7 +100,7 @@ class Trainer:
         ''' 
         GAP PhotonLoss
         '''
-        expEnergy = jnp.exp(result)
+        expEnergy = jnp.exp(result) 
         perImage = -jnp.mean(result*target, axis = (-2, -3, -1), keepdims=True)
         perImage += jnp.log(jnp.mean(expEnergy, axis = (-2, -3, -1), keepdims= True))*jnp.mean(target, axis = (-2, -3, -1), keepdims= True)
 
@@ -158,22 +164,23 @@ class Trainer:
         ''' 
         Save the checkpoints of the model 
         '''
-        if not os.path.exists(self.root_dir):
-            os.makedirs(self.root_dir)
-        checkpoints.save_checkpoint(ckpt_dir=self.root_dir,
-                                    target=self.state.params,
-                                    step=step,
-                                    overwrite=True)
+        ckpt = {'model': self.state}
+        save_args = orbax_utils.save_args_from_target(ckpt)
+        self.checkpoint_manager.save(step, ckpt, save_kwargs={'save_args': save_args})
+
+        # if not os.path.exists(self.root_dir):
+        #     os.makedirs(self.root_dir)
+        # checkpoints.save_checkpoint(ckpt_dir=self.root_dir,
+        #                             target=self.state.params,
+        #                             step=step,
+        #                             overwrite=True)
 
     def load_model(self):
         ''' 
         Loads the checkpoints of the model and creates its state
         '''
-        state_dict = checkpoints.restore_checkpoint(ckpt_dir=self.root_dir,
-                                                    target=self.state.params)
-        self.state = TrainState.create(apply_fn=self.state.apply_fn,
-                                       params=state_dict,
-                                       tx=self.state.tx)
+        step = self.checkpoint_manager.latest_step()  
+        return self.checkpoint_manager.restore(step)
 
     def checkpoint_exists(self):
         return os.path.isfile(f'{self.root_dir}.ckpt')
