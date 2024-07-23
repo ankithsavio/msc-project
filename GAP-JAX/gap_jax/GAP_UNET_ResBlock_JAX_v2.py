@@ -27,7 +27,7 @@ class DownConv(nn.Module):
         self.conv1 = nn.Conv(features= self.out_channels,
                              kernel_size= (3, 3), 
                              strides= (1, 1),
-                             padding= 'SAME',
+                             padding= (1, 1),
                              use_bias= True,
                              name= 'DownConv-1',
                              kernel_init= nn.initializers.xavier_normal(dtype = self.dtype),
@@ -36,7 +36,7 @@ class DownConv(nn.Module):
         self.conv2 = nn.Conv(features= self.out_channels,
                              kernel_size= (3, 3), 
                              strides= (1, 1),
-                             padding= 'SAME',
+                             padding= (1, 1),
                              use_bias= True,
                              name= 'DownConv-2',
                              kernel_init= nn.initializers.xavier_normal(dtype = self.dtype),
@@ -45,7 +45,7 @@ class DownConv(nn.Module):
         self.conv3 = nn.Conv(features= self.out_channels,
                              kernel_size= (3, 3), 
                              strides= (1, 1),
-                             padding= 'SAME',
+                             padding= (1, 1),
                              use_bias= True,
                              name= 'DownConv-3',
                              kernel_init= nn.initializers.xavier_normal(dtype = self.dtype),
@@ -96,7 +96,7 @@ class UpConv(nn.Module):
         self.conv1 = nn.Conv(features= self.out_channels,
                              kernel_size= (3, 3), 
                              strides= (1, 1),
-                             padding= 'SAME',
+                             padding= (1, 1),
                              use_bias= True,
                              name= 'UpConv-1',
                              kernel_init= nn.initializers.xavier_normal(dtype = self.dtype),
@@ -105,7 +105,7 @@ class UpConv(nn.Module):
         self.conv2 = nn.Conv(features= self.out_channels,
                              kernel_size= (3, 3), 
                              strides= (1, 1),
-                             padding= 'SAME',
+                             padding= (1, 1),
                              use_bias= True,
                              name= 'UpConv-2',
                              kernel_init= nn.initializers.xavier_normal(dtype = self.dtype),
@@ -114,7 +114,7 @@ class UpConv(nn.Module):
         self.conv3 = nn.Conv(features= self.out_channels,
                              kernel_size= (3, 3), 
                              strides= (1, 1),
-                             padding= 'SAME',
+                             padding= (1, 1),
                              use_bias= True,
                              name= 'UpConv-3',
                              kernel_init= nn.initializers.xavier_normal(dtype = self.dtype),
@@ -197,8 +197,8 @@ class UN(nn.Module):
         
         stack = None
         factor = 10.0
-        for i in range (self.levels):
-            scale = x*(factor**(-i))
+        for i in range(self.levels):
+            scale = x.copy()*(factor**(-i))
             scale = jnp.sin(scale)
             if stack is None:
                 stack = scale
