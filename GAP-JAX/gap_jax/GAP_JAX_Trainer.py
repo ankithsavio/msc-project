@@ -58,7 +58,7 @@ class Trainer:
         self.init_training()
         orbax_checkpointer = ocp.PyTreeCheckpointer()
         options = ocp.CheckpointManagerOptions(max_to_keep=2, create=True)
-        self.checkpoint_manager = ocp.CheckpointManager(f'{self.root_dir}orbax/managed', orbax_checkpointer, options)
+        self.checkpoint_manager = ocp.CheckpointManager(f'{self.root_dir}orbax/', orbax_checkpointer, options)
         if self.platform == 'gpu': 
             print(f'GPU detected with {jax.process_count()} Device(s).')
         elif self.platform == 'tpu':
@@ -72,9 +72,9 @@ class Trainer:
         Initializes the Unet model for GAP training
         '''
         init_rng = jax.random.key(self.seed)
-        key, _ = jax.random.split(init_rng)
+        init_key, _ = jax.random.split(init_rng)
         print(f'\nUsing Dummy data of shape : {self.dummy_img.shape}')
-        params = self.model.init(key, self.dummy_img)
+        params = self.model.init(init_key, self.dummy_img)
         self.state = TrainState(step=0,
                                 apply_fn=self.model.apply,
                                 params=params,
@@ -109,7 +109,7 @@ class Trainer:
     def init_training(self):
         def train_step(state, batch):
             '''
-            Computes loss and applies a gradietn step
+            Computes loss and applies a gradient step
             '''
             def compute_loss(params):
                 ''' 
