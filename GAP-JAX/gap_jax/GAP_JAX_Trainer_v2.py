@@ -1,11 +1,12 @@
-''' 
-    Credits for Trainer Module : https://github.com/phlippe/jax_trainer
+'''
+Trainer Surgery
 '''
 import os
 import jax
 import jax.numpy as jnp
 import flax.linen as nn
-from flax.training import train_state
+from flax.training.train_state import TrainState
+
 from flax.training.early_stopping import EarlyStopping
 from flax.training import checkpoints
 import optax
@@ -13,28 +14,6 @@ from tqdm.auto import tqdm
 from torch.utils.tensorboard import SummaryWriter
 import orbax.checkpoint as ocp
 from flax.training import orbax_utils
-
-
-
-class TrainState(train_state.TrainState):
-    value: jnp.array = None 
-
-    def apply_gradients(self, *, grads, value, **kwargs):
-        """
-          value: The metric value to be passed to the learning rate scheduler.
-        """
-        updates, new_opt_state = self.tx.update(
-            grads, self.opt_state, self.params, value=value
-        )
-        new_params = optax.apply_updates(self.params, updates)
-
-        return self.replace(
-            step=self.step + 1,
-            params=new_params,
-            opt_state=new_opt_state,
-            value=value,
-            **kwargs,
-        )
 
 
 class Trainer:
@@ -86,10 +65,7 @@ class Trainer:
         Initializes adam optimizer with gradient clipping and learning rate schedule to reduce on plateau
         '''
         tx = optax.chain(optax.clip_by_global_norm(self.gradient_clip_val),
-                         optax.adam(learning_rate= self.learning_rate),
-                         optax.contrib.reduce_on_plateau(factor = 0.5,
-                                                         patience= 10,
-                                                         accumulation_size= self.steps_per_epoch),
+                         optax.adam(learning_rate= self.learning_rate)
                         )
         
         self.state = TrainState.create(apply_fn= self.state.apply_fn,
@@ -122,7 +98,7 @@ class Trainer:
             grad_fn = jax.value_and_grad(compute_loss)
             loss, grads = grad_fn(state.params)
 
-            state = state.apply_gradients(grads = grads, value = loss)
+            state = state.apply_gradients(grads = grads)
             return state, loss
         
         def eval_step(state, batch):
@@ -167,13 +143,6 @@ class Trainer:
         ckpt = {'model': self.state}
         save_args = orbax_utils.save_args_from_target(ckpt)
         self.checkpoint_manager.save(step, ckpt, save_kwargs={'save_args': save_args})
-
-        # if not os.path.exists(self.root_dir):
-        #     os.makedirs(self.root_dir)
-        # checkpoints.save_checkpoint(ckpt_dir=self.root_dir,
-        #                             target=self.state.params,
-        #                             step=step,
-        #                             overwrite=True)
 
     def load_model(self):
         ''' 
