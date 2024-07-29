@@ -59,8 +59,8 @@ class DataFolder(ImageFolder):
 
         binom = torch.distributions.binomial.Binomial(total_count=img, probs=torch.tensor([level]))
         imgNoise = binom.sample()
-        gt = (gt / (gt.mean() + 1e-9))
-        img = (img - imgNoise).type(torch.float)
+        # gt = (gt / (gt.mean() + 1e-9))
+        img = (img - imgNoise).type(torch.float) 
         img = img / (img.mean()+1e-8)
         
         imgNoise = imgNoise.type(torch.float)

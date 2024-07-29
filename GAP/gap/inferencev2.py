@@ -27,11 +27,12 @@ def sample_image(input_image,
                  max_its = 500000,
                  max_psnr = -15,
                  save_every_n = 5,
-                 beta = 0.1
+                 beta = 0.1,
+                 channels = 1
                 ):
 
-    start = input_image[:,-1, :, :][None].clone()
-    cond_input = input_image[:,:-1, :, :].clone()
+    start = input_image[:,-channels:, :, :][None].clone()
+    cond_input = input_image[:,:-channels, :, :].clone()
     photons = start
     photnum = 1
 
