@@ -1,13 +1,12 @@
+import os
 import torch as torch
 import numpy as np
 from torchvision import transforms
-from torchvision.datasets import ImageFolder
-from torchvision.datasets.folder import default_loader
+from PIL import Image
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
+from typing import Union
 
-
-class BinomDataset(ImageFolder):
+class BinomDataset(torch.utils.data.Dataset):
     '''
     Returns a BinomDataset that will randomly split an image into input and target using a binomial distribution for each pixel.
             
@@ -29,15 +28,10 @@ class BinomDataset(ImageFolder):
         minPSNR,
         maxPSNR,
         virtSize = None,
+        scale = 50,
         augment = True,
         maxProb = 0.99,
-        transform: Optional[Callable] = None,
-        target_transform: Optional[Callable] = None,
-        loader: Callable[[str], Any] = default_loader,
-        is_valid_file: Optional[Callable[[str], bool]] = None,
-        allow_empty: bool = False,
     ):
-        super().__init__(root, transform, target_transform, loader, is_valid_file, allow_empty)
         self.crop = transforms.RandomCrop(windowSize)
         self.flipH = transforms.RandomHorizontalFlip()
         self.flipV = transforms.RandomVerticalFlip()
@@ -47,14 +41,32 @@ class BinomDataset(ImageFolder):
         self.maxProb = maxProb
         self.virtSize = virtSize
         self.augment = augment
-        
+        self.scale = scale
+        self.samples = self.make_dataset(root = root)
+    
+    @staticmethod
+    def make_dataset(root : Union[str, Path]):
+        samples = []
+        for fnames in os.listdir(root):
+            path = os.path.join(root, fnames)
+            samples.append(path)
+        return samples
+
+    def loader(self, path : Union[str, Path]):
+        with open(path, "rb") as f:
+            img = Image.open(f)
+            return img.convert("RGB")
+    
+    def __len__(self):
+        return len(self.samples)
+    
     def __getitem__(self, idx):
         idx_ = idx 
         if self.virtSize is not None:
-            idx_ = np.random.randint(super().__len__()) # get random sample
-        data, _ = super().__getitem__(index = idx_)
+            idx_ = np.random.randint(len(self.samples)) # get random sample
+        data = self.loader(self.samples[idx_])
         data = np.array(data).astype(np.int32).transpose(2, 0 ,1)
-        img = self.crop(torch.from_numpy(data)) 
+        img = self.crop(torch.from_numpy(data)) * self.scale
         
         uniform = np.random.rand()*(self.maxPSNR-self.minPSNR)+self.minPSNR
 
