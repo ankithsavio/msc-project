@@ -84,7 +84,7 @@ class BinomDataset(torch.utils.data.Dataset):
         level = (10**(uniform/10.0))/ (img.type(torch.float).mean().item()+1e-5)
         level = min(level, self.maxProb)
 
-        gt = gt / (gt.mean()+1e-8)
+        gt = (gt / (gt.mean()+1e-8))
 
         binom = torch.distributions.binomial.Binomial(total_count=img, probs=torch.tensor([level]))
         imgNoise = binom.sample()
