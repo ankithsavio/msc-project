@@ -32,11 +32,14 @@ def sample_image(input_image,
                  max_psnr = -15,
                  save_every_n = 5,
                  beta = 0.1,
-                 channels = 1
+                 channels = 1,
+                 use_mask = False,
+                 const_photon = None,
                 ):
 
     start = input_image[:,-channels:, :, :].clone()
     cond_input = input_image[:,:-channels, :, :].clone()
+    mask = cond_input[:, :1, :, :].clone()
     photons = start
     photnum = 1
 
@@ -83,10 +86,16 @@ def sample_image(input_image,
         photnum = max(beta* photons.sum(),1)
         
         # draw new photons
-        new_photons = torch.poisson(denoised*(photnum)) 
+        if const_photon:
+            new_photons = torch.poisson(denoised*(const_photon)) 
+        else:
+            new_photons = torch.poisson(denoised*(photnum)) 
         
         # add new photons
-        photons = photons + new_photons
+        if use_mask:
+            photons = (photons + new_photons) * mask
+        else: 
+            photons = photons + new_photons
         print(photons.shape) 
         
     
