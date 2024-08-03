@@ -71,18 +71,27 @@ class BinomDataset(torch.utils.data.Dataset):
         data = np.array(data).astype(np.int32).transpose(2, 0 ,1)
         img = torch.from_numpy(data) * self.scale
         
+        
         uniform = np.random.rand()*(self.maxPSNR-self.minPSNR)+self.minPSNR
-
+        # print(f'clean uniform: {uniform}')
         level = (10**(uniform/10.0))/ (img.type(torch.float).mean().item()+1e-5)
         level = min(level, self.maxProb)
 
         gt = img.clone().type(torch.float)
         gt = gt / (gt.mean()+1e-8)
 
-        binom = torch.distributions.binomial.Binomial(total_count=img, probs=torch.tensor([level]))
-        imgTarget = binom.sample()
+        binom_target = torch.distributions.binomial.Binomial(total_count=img, probs=torch.tensor([level]))
+        imgTarget = binom_target.sample()
+        norm = imgTarget.clone()
+        norm = norm / (norm.sum(dim=(-1,-2,-3), keepdim = True))
+        photnum = max(0.99 * imgTarget.sum(),1) 
+        img = (norm*(photnum)).to(torch.int32)
+
+        level = (10**(uniform/10.0))/ (img.type(torch.float).mean().item()+1e-5)
+        level = min(level, self.maxProb)
         
-        imgNoise = torch.poisson(imgTarget)
+        binom_noise = torch.distributions.binomial.Binomial(total_count=img, probs=torch.tensor([0.90]))
+        imgNoise = binom_noise.sample()
         
         imgTarget = imgTarget.type(torch.float)
         imgNoise = imgNoise.type(torch.float)
@@ -90,7 +99,7 @@ class BinomDataset(torch.utils.data.Dataset):
         mask = self.mask_gen.generate_mask()
 
         out = torch.cat((imgTarget, mask, gt * (1 - mask) ,imgNoise),dim = 0)
-            
+        # print('version 10')
         if np.random.rand()<0.5:
             out = self.flipH(out)
         return out

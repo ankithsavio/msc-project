@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import cv2
 
 def preprocess(inp):
     ''' 
@@ -26,3 +27,26 @@ def stats(*inp):
     
     for x in inp:
         print_stats(x)
+
+def stack_video(stack, filename):
+    if len(stack[0].shape) == 3:
+        _, H, W = stack[0].shape
+        framerate = 5
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
+        out = cv2.VideoWriter(filename, fourcc, framerate, (W, H))
+        for frame in stack:
+            out.write(cv2.cvtColor((frame.transpose(1, 2, 0) * 255).astype(np.uint8), cv2.COLOR_RGB2BGR))
+        out.release()
+    elif len(stack[0].shape) == 2:
+        H, W = stack[0].shape
+        framerate = 3
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
+        out = cv2.VideoWriter(filename, fourcc, framerate, (W, H), isColor= True)
+        for frame in stack:
+            frame_normalized = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+            frame_color = cv2.applyColorMap(frame_normalized, cv2.COLORMAP_INFERNO)
+            out.write(frame_color)
+        out.release()
+    else:
+        raise ValueError('stacked images have dim > 3')
+    print(f'Video saved at {filename} + v4')
