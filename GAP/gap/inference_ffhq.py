@@ -21,9 +21,6 @@ If it contains photon numbers, the model performs diversity denoising.
                 stack (list): list of numpy arrays containing intermediate results.
                 i (int) number of executed iterations.
 '''
-def stats(img):
-    print(f'\nMax : {img.max()}\nMin : {img.min()}\nMean : {img.mean()}\nSum : {img.sum()}\n')
-
 
 def sample_image(input_image,
                  model,
@@ -32,7 +29,8 @@ def sample_image(input_image,
                  max_psnr = -15,
                  save_every_n = 5,
                  beta = 0.1,
-                 channels = 1
+                 channels = 1,
+                 use_poisson = True
                 ):
 
     start = input_image[:,-channels:, :, :].clone()
@@ -58,36 +56,37 @@ def sample_image(input_image,
             
         if psnr > max_psnr:
             break
-        print(f'cond_input shape : {cond_input.shape}\nphotons shape: {photons.shape}\n\n\n')
+
         input = torch.cat((cond_input, photons),1)
         denoised = model(input).detach()
-        denoised = denoised - denoised.max()
-        denoised = torch.exp(denoised)   
-        denoised = denoised / (denoised.sum(dim=(-1,-2,-3), keepdim = True))
-        print(denoised.shape)
-        stats(denoised)
-        stats(photons)
-        
+        if use_poisson:
+            denoised = denoised - denoised.max()
+            denoised = torch.exp(denoised)   
+            denoised = denoised / (denoised.sum(dim=(-1,-2,-3), keepdim = True))
+        else:
+            denoised = torch.exp(denoised)
 
         # here we save an image into our stack
         if (save_every_n is not None) and (i%save_every_n == 0):  
 
-            imgsave = denoised[0,0,:,...].detach().cpu()
+            imgsave = denoised[0,:,...].detach().cpu()
             imgsave = imgsave/imgsave.max()
-            photsave = photons[0,0,:,...].detach().cpu()
+            photsave = photons[0,:,...].detach().cpu()
             photsave = photsave / max(photsave.max(),1)      
-            combi = torch.cat((photsave,imgsave),1)
+            combi = torch.cat((photsave,imgsave),2)
             stack.append(combi.numpy())
 
         # increase photon number    
         photnum = max(beta* photons.sum(),1)
         
         # draw new photons
-        new_photons = torch.poisson(denoised*(photnum)) 
+        if use_poisson:
+            new_photons = torch.poisson(denoised*(photnum))
+        else:
+            new_photons = denoised
         
         # add new photons
         photons = photons + new_photons
-        print(photons.shape) 
-        
+        print(f'Iteration : {i + 1}')        
     
     return denoised[...].detach().cpu().numpy(), photons[...].detach().cpu().numpy(), stack, i
