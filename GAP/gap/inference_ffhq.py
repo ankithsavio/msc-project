@@ -40,10 +40,6 @@ def sample_image(input_image,
 
     denoised = None
     stack = []
-    
-    sumDenoised = start
-    region = 64
-
 
     for i in range(max_its):
    
@@ -78,7 +74,6 @@ def sample_image(input_image,
 
         # increase photon number    
         photnum = max(beta* photons.sum(),1)
-        
         # draw new photons
         if use_poisson:
             new_photons = torch.poisson(denoised*(photnum))
@@ -87,6 +82,5 @@ def sample_image(input_image,
         
         # add new photons
         photons = photons + new_photons
-        print(f'Iteration : {i + 1}')        
     
     return denoised[...].detach().cpu().numpy(), photons[...].detach().cpu().numpy(), stack, i
