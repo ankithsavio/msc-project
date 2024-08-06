@@ -6,7 +6,7 @@ Mask conditioned image generation for epsilon gap
 import torch as torch
 import numpy as np
 from torchvision import transforms
-from utils import inpainting
+from tasks import inpainting
 
 class BinomDataset(torch.utils.data.Dataset):
     '''
