@@ -5,7 +5,6 @@ from torchvision import transforms
 from PIL import Image
 from pathlib import Path
 from typing import Union
-from tasks import inpainting
 
 class BinomDataset(torch.utils.data.Dataset):
     '''
@@ -32,10 +31,10 @@ class BinomDataset(torch.utils.data.Dataset):
         scale = 100,
         augment = True,
         maxProb = 0.99,
+        in_size = 64,
+        out_size = 512
     ):
-        # self.crop = transforms.RandomCrop(windowSize)
         self.flipH = transforms.RandomHorizontalFlip()
-        # self.flipV = transforms.RandomVerticalFlip()
         self.minPSNR = minPSNR
         self.maxPSNR = maxPSNR
         self.windowSize = windowSize
@@ -43,7 +42,8 @@ class BinomDataset(torch.utils.data.Dataset):
         self.virtSize = virtSize
         self.augment = augment
         self.scale = scale
-        self.mask_gen = inpainting()
+        self.in_size = in_size
+        self.out_size = out_size
         self.samples = self.make_dataset(root = root)
     
     @staticmethod
@@ -60,12 +60,17 @@ class BinomDataset(torch.utils.data.Dataset):
             img = Image.open(f)
             return img.convert("RGB")
 
-    def convert2lowres(self, img):
-        lr = transforms.functional.resize(img = img, size = 64, interpolation = Image.BICUBIC, antialias = True)
-        lr = transforms.functional.center_crop(img  = lr, output_size = 64)
-        sr = transforms.functional.resize(img = lr, size = 512, interpolation = Image.BICUBIC, antialias = True)
-        return sr
-
+    def convert2lowres(self, img, in_size, out_size):
+        img = transforms.functional.resize(img = img, size = in_size, interpolation = Image.BICUBIC, antialias = True)
+        img = transforms.functional.center_crop(img  = img, output_size = in_size)
+        img = transforms.functional.resize(img = img, size = out_size, interpolation = Image.BICUBIC, antialias = True)
+        return img
+    
+    def resize(self, img, out_size):
+        img = transforms.functional.resize(img = img, size = out_size, interpolation = Image.BICUBIC, antialias = True)
+        img = img - img.min()
+        img = torch.from_numpy(img.numpy().astype(np.int32))
+        return img
 
     def __len__(self):
         return len(self.samples)
@@ -79,9 +84,10 @@ class BinomDataset(torch.utils.data.Dataset):
         img = torch.from_numpy(data) 
 
         gt = img.clone().type(torch.float)
-        sr = self.convert2lowres(gt)
+        sr = self.convert2lowres(img = gt, in_size = self.in_size, out_size = self.out_size)
         sr = sr / (sr.mean()+1e-8)
-
+    
+        img = self.resize(img = img, out_size = self.out_size)
         img = img * self.scale
         
         uniform = np.random.rand()*(self.maxPSNR-self.minPSNR)+self.minPSNR
