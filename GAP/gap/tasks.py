@@ -33,6 +33,14 @@ class inpainting:
                 bbox[1]+w:bbox[1]+bbox[3]-w] = 1.
         return torch.from_numpy(mask)
     
+    def generate_static_mask(self):
+        bbox = self.randombbox()
+        imgsize = self.imgsize
+        mask = np.zeros((1, imgsize, imgsize), np.float32)
+        mask[:, bbox[0]:bbox[0]+bbox[2],          
+                bbox[1]:bbox[1]+bbox[3]] = 1.
+        return torch.from_numpy(mask)
+    
     def generate_stroke_mask(self):
         min_num_vertex = 4
         max_num_vertex = 12

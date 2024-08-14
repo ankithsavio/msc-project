@@ -28,10 +28,9 @@ def stats(*inp):
     for x in inp:
         print_stats(x)
 
-def stack_video(stack, filename):
+def stack_video(stack, filename, framerate):
     if len(stack[0].shape) == 3:
         _, H, W = stack[0].shape
-        framerate = 5
         fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
         out = cv2.VideoWriter(filename, fourcc, framerate, (W, H))
         for frame in stack:
@@ -39,7 +38,6 @@ def stack_video(stack, filename):
         out.release()
     elif len(stack[0].shape) == 2:
         H, W = stack[0].shape
-        framerate = 3
         fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
         out = cv2.VideoWriter(filename, fourcc, framerate, (W, H), isColor= True)
         for frame in stack:

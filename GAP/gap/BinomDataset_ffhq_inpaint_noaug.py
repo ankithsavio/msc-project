@@ -45,6 +45,7 @@ class BinomDataset(torch.utils.data.Dataset):
         self.scale = scale
         self.mask_gen = inpainting(imgsize = imgsize, masksize = masksize)
         self.samples = self.make_dataset(root = root)
+        self.imgsize = imgsize
     
     @staticmethod
     def make_dataset(root : Union[str, Path]):
@@ -59,6 +60,12 @@ class BinomDataset(torch.utils.data.Dataset):
         with open(path, "rb") as f:
             img = Image.open(f)
             return img.convert("RGB")
+        
+    def resize(self, img, out_size):
+        img = transforms.functional.resize(img = img, size = out_size, interpolation = Image.BICUBIC, antialias = True)
+        img = img - img.min()
+        img = torch.from_numpy(img.numpy().astype(np.int32))
+        return img
     
     def __len__(self):
         return len(self.samples)
@@ -69,7 +76,7 @@ class BinomDataset(torch.utils.data.Dataset):
             idx_ = np.random.randint(len(self.samples)) # get random sample
         data = self.loader(self.samples[idx_])
         data = np.array(data).astype(np.int32).transpose(2, 0 ,1)
-        img = torch.from_numpy(data) * self.scale
+        img = self.resize(img = torch.from_numpy(data), out_size= self.imgsize) * self.scale
         
         uniform = np.random.rand()*(self.maxPSNR-self.minPSNR)+self.minPSNR
 
