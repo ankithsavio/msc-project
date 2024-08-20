@@ -1,6 +1,8 @@
 import numpy as np
 import torch
 import cv2
+from torchvision.transforms.functional import resize as size
+from PIL import Image
 
 def preprocess(inp):
     ''' 
@@ -48,3 +50,6 @@ def stack_video(stack, filename, framerate):
     else:
         raise ValueError('stacked images have dim > 3')
     print(f'Video saved at {filename} + v4')
+
+def resize(img, out, dtype = torch.float32):
+    return size(img, size = out, interpolation= Image.BICUBIC, antialias= True).to(dtype)
