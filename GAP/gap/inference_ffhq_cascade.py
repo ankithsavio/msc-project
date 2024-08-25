@@ -30,11 +30,15 @@ def sample_image(input_image,
                  save_every_n = 5,
                  beta = 0.1,
                  channels = 1,
-                 use_poisson = True
+                 use_poisson = True,
+                 grayscale = False
                 ):
 
     start = input_image[:,-channels:, :, :].clone()
-    cond_input = input_image[:,:-channels, :, :].clone()
+    if not grayscale:
+        cond_input = input_image[:,:-channels, :, :].clone()
+    else:
+        cond_input = input_image[:,:-1, :, :].clone()
     photons = start
     photnum = 1
 
