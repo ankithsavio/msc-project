@@ -31,7 +31,8 @@ def sample_image(input_image,
                  beta = 0.1,
                  channels = 1,
                  use_poisson = True,
-                 grayscale = False
+                 grayscale = False,
+                 psnr_range_init = True
                 ):
 
     start = input_image[:,-channels:, :, :].clone()
@@ -44,8 +45,10 @@ def sample_image(input_image,
 
     denoised = None
     stack = []
-
-    psnrs = [-32.5, -25, -17.5, -10, -2.5, 5, 12.5, 20]
+    if psnr_range_init:
+        psnrs = [-32.5, -25, -17.5, -10, -2.5, 5, 12.5, 20]
+    else:
+        psnrs = [-30, -20, -10, 0, 10, 20, 30]
     psnrs = psnrs[:len(models)]
     
     for n in range(len(psnrs)):
